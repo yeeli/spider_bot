@@ -1,0 +1,29 @@
+
+date:
+  time:
+    year: "年|year|years"
+    month: "月|month|months|mon"
+    week: "周|星期|week|weeks"
+    day: "日|天|day|days"
+    hour: "时|小时|時|小時|hour|hours|hr|hrs|h"
+    min: "分|分钟|minute|minutes|min|mins|m"
+    second: "秒|second|seconds|sec|secs|s"
+  month:
+    jan: "january|jan|一月"
+    feb: "february|feb|二月"
+    mar: "march|mar|三月"
+    apr: "april|apr|四月"
+    may: "may|五月"
+    jun: "june|jun|六月"
+    jul: "july|jul|七月"
+    aug: "august|aug|八月"
+    sep: "september|sep|九月"
+    oct: "october|oct|十月"
+    nov: "november|nov|十一月"
+    dec: "december|dec|十二月"
+  other:
+    ago: "ago|前|以前"
+    today: "today|今天"
+    am: "AM|am|上午"
+    pm: "PM|pm|下午"
+

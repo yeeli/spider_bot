@@ -1,31 +1,78 @@
 # SpiderBot
 
-TODO: Write a gem description
+一个简单的机器爬虫
 
-## Installation
+## 安装
 
-Add this line to your application's Gemfile:
+将下列文字添加到你程序中的Gemfile里
 
 ```ruby
 gem 'spider_bot'
 ```
 
-And then execute:
+并执行:
 
     $ bundle
 
-Or install it yourself as:
+或者直接通过命令安装:
 
     $ gem install spider_bot
 
-## Usage
+## 使用
 
-TODO: Write usage instructions here
+### 执行独立文件
 
-## Contributing
+spider -bot name_bot.rb -out data.txt
 
-1. Fork it ( https://github.com/[my-github-username]/spider_bot/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+###独立程序中使用
+
+初始化爬虫程序
+	
+	$ spider new projectName
+
+然后自动生成
+
+```
+  projectNmae
+    |— app
+      |- models #数据库文件
+         |- model.rb
+      |- bots  #爬虫文件
+         |- site_bot.rb
+    |- config
+      |- database.yml #数据文件
+      |- splider.yml #爬虫程序的配置文件
+    |- log
+    |- db
+    
+```
+
+通过命令生成爬虫文件
+
+splider bot #{bot_name} 
+
+最后执行
+
+	$ cd ProjectName
+	$ spider start
+
+### 在Rails中使用
+
+添加爬虫文件
+
+	$ rails new bot #{bot_name}
+	
+当执行上述命令后， 会自动在rails程序中的app目录下生成bots目录。
+  
+```
+Rails Project
+  |- app
+    |- bots #爬虫程序
+  |- config
+    |- splider.yml #爬虫程序的配置
+```
+
+然后在rails应用中执行
+
+	$ bundle exec splider start
+

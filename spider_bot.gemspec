@@ -25,5 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday"
   spec.add_dependency "nokogiri"
   spec.add_dependency "multi_json"
+  spec.add_dependency "multi_xml"
   spec.add_dependency "tzinfo"
 end
