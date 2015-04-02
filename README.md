@@ -20,6 +20,27 @@ gem 'spider_bot'
 
 ## 使用
 
+### 文件调用
+
+```ruby
+require 'spider_bot'
+
+SpiderBot.crawl("http:://example.com/funny")
+
+```
+
+
+
+crawl_options 参数
+
+* path
+* type
+* headers
+* query 
+* data 需要爬去的数据
+* since 需要获取的最后一条参数
+
+
 ### 执行独立文件
 
 spider -bot name_bot.rb -out data.txt
