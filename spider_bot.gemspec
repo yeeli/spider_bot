@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "multi_xml"
   spec.add_dependency "tzinfo"
   spec.add_dependency "thor"
+  spec.add_dependency 'daemons'
 end
