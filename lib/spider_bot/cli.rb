@@ -3,6 +3,7 @@
 $LOAD_PATH.unshift(File.expand_path('../..', __FILE__))
 require "thor"
 require 'spider_bot'
+require 'daemons'
 
 module SpiderBot
   class CLI < Thor

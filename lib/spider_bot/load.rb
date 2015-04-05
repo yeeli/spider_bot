@@ -3,7 +3,6 @@ begin
 rescue LoadError => e
   require File.expand_path("./config/boot")
 end
-require 'daemons'
 
 if defined?(Padrino)
   puts "read padrino environment #{Padrino.env}" 
