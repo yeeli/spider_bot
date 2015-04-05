@@ -21,8 +21,18 @@ module SpiderBot
      aliases: ["-r"],
      desc: "random"
 
+    method_option :env,
+     aliases: ["-e"],
+     desc: "random"
+
     def start
       puts "start....."
+      
+      if options[:env]
+        ENV['RACK_ENV'] = options[:env]
+      else
+        ENV['RACK_ENV']= 'development'
+      end
       
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
       
@@ -39,7 +49,7 @@ module SpiderBot
       else
         puts "press ctrl-c exit"
       end
-      
+
       stop if File.exists?("tmp/spider.pid")
 
       if option_time = options[:time]
