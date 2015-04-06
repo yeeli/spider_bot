@@ -37,7 +37,7 @@ module SpiderBot
       @paginate_num = @page_start
       request_body = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_since, &block)
       return request_body  if !block_given?
-      yield request_body, @paginate_num, URI.join(@uri, @origin_path, @origin_query.map{|k,v| "#{k}=#{v}"}.join("&"))
+      yield request_body, @paginate_num, get_page_url(@origin_path, @origin_query)
       @paginate_num += @page_add
       raise "Net Error" if request_body.nil?
       return if @page_query.blank? && @page_path == @origin_path
@@ -60,10 +60,12 @@ module SpiderBot
   
           request_body = crawl_request(path, query, @page_type, @page_data, @page_since, &block)
           break if request_body.nil?
-          yield request_body, @paginate_num, URI.join(@uri, path, query.map{|k,v| "#{k}=#{v}"}.join("&"))
+          yield request_body, @paginate_num, get_page_url(path, query) 
           @paginate_num += @page_add
         end
+
         @pagiante_error = 0
+
       rescue Exception => e
         puts "pagiante error"
         puts e
@@ -90,12 +92,17 @@ module SpiderBot
         @paginate_since = eval("body#{since}")
       else
         body_data = body.css(data)
+        return if body_data.blank?
         if value = body_data.last.attributes[since]
           @paginate_since = value.text 
         end
       end
 
       return body_data 
+    end
+
+    def get_page_url(path, query)
+      URI.join(@uri, path, query.map{|k,v| "#{k}=#{v}"}.join("&"))
     end
 
     def set_paginate_headers(arg)

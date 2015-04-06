@@ -39,7 +39,7 @@ module SpiderBot
       daemon_options = {
         app_name: 'spider',
         ontop: true,
-        dir: 'tmp'
+        dir: 'tmp',
       }
 
       sleep_time = 10
@@ -74,7 +74,12 @@ module SpiderBot
         threads = []
         BOTDIR.each do |file|
           threads << Thread.new do
-            load file
+            begin
+              load file
+            rescue Exception => e
+              puts " in #{ file }"
+              puts e
+            end
           end
         end
         threads.each { |t| t.join }
@@ -125,7 +130,12 @@ module SpiderBot
 
           Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
             threads << Thread.new do
-              load file
+              begin
+                load file
+              rescue Exception => e
+                puts " in #{ file }"
+                puts e
+              end
             end
           end
 
