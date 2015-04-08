@@ -7,23 +7,90 @@ require 'daemons'
 
 module SpiderBot
   class CLI < Thor
-    desc "start", "start spider bot"
+    desc "url", "Crawl url"
+
+    method_option :query,
+      aliases: "-q",
+      desc: "Set url query"
+
+    method_option :data,
+      aliases: "-d",
+      desc: "Match html data"
+
+    method_option :out,
+      aliases: ["-o"],
+      desc: "Write to file"
+
+    def url(arg)
+      data = Crawl.new(arg, options).crawl_data
+      return File.open(options[:out], "w"){ file.puts data } if options[:out]
+      return puts data 
+    end
+
+
+    desc "crawl", "Run spider bot file"
+
+    method_option :bot, 
+      aliases: ["-b"], 
+      desc: "Read bot flle"
+
+    method_option :dir, 
+      aliases: ["-d"], 
+      desc: "Read bot directory"
+    
+    def crawl
+      if options[:bot]
+        bot_file = File.expand_path(options[:bot]) 
+        
+        if File.exists?(bot_file)
+          load bot_file 
+        else
+          raise "file not found"
+        end
+      end
+
+      if options[:dir]
+        bot_dir = File.expand_path(options[:dir]) 
+
+        if Dir.exists?(bot_dir)
+          threads = []
+
+          Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
+            threads << Thread.new do
+              begin
+                load file
+              rescue Exception => e
+                puts " in #{ file }"
+                puts e
+              end
+            end
+          end
+
+          threads.each { |t| t.join }
+        else
+          raise "dir not found"
+        end
+      end
+    end
+
+
+    desc "start", "Run spider bot service"
    
     method_option :daemon, 
       aliases: ["-d"], 
-      desc: "daemon"
+      desc: "Run spider bot service in background"
 
     method_option :time,
       aliases: ["-t"],
-      desc: "time"
+      desc: "Set crawl interval"
 
     method_option :random,
      aliases: ["-r"],
-     desc: "random"
+     desc: "Set crawl interval to random "
 
     method_option :env,
      aliases: ["-e"],
-     desc: "random"
+     desc: "set spider service environment"
 
     def start
       puts "start....."
@@ -93,82 +160,12 @@ module SpiderBot
       end
     end
 
-    desc 'stop', "stop"
+    desc 'stop', "Stop spider bot service"
 
     def stop
       pid = File.read("tmp/spider.pid").to_i
       Process.kill(9, pid)
       File.delete("tmp/spider.pid")
-    end
-
-    desc "crawl", "crawl bot file"
-
-    method_option :bot, 
-      aliases: ["-b"], 
-      desc: "read bot flle"
-
-    method_option :dir, 
-      aliases: ["-d"], 
-      desc: "read dir bot flle"
-    
-    def crawl
-      if options[:bot]
-        bot_file = File.expand_path(options[:bot]) 
-        
-        if File.exists?(bot_file)
-          load bot_file 
-        else
-          raise "file not found"
-        end
-      end
-
-      if options[:dir]
-        bot_dir = File.expand_path(options[:dir]) 
-
-        if Dir.exists?(bot_dir)
-          threads = []
-
-          Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
-            threads << Thread.new do
-              begin
-                load file
-              rescue Exception => e
-                puts " in #{ file }"
-                puts e
-              end
-            end
-          end
-
-          threads.each { |t| t.join }
-        else
-          raise "dir not found"
-        end
-      end
-    end
-
-    desc "url", "crawl url response"
-
-    method_option :data,
-      aliases: "-d",
-      desc: "set match data"
-
-    method_option :query,
-      aliases: "-q",
-      desc: "set query"
-
-    method_option :out,
-      aliases: ["-o"],
-      desc: "out data file"
-
-    def url(arg)
-      data = Crawl.new(arg, options).crawl_data
-      if options[:out]
-        file = File.open(options[:out], "w")
-        file.puts data
-        file.close
-      else
-        puts data
-      end
     end
   end
 end

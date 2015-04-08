@@ -19,6 +19,7 @@ module SpiderBot
   end
 
   autoload :Crawl, 'spider_bot/crawl'
+  autoload :Base, 'spider_bot/base'
   module Http
     autoload :Client, 'spider_bot/http/client'
     autoload :Response, 'spider_bot/http/response'

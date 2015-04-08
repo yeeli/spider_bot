@@ -5,7 +5,7 @@ module SpiderBot
       @uri = parse_uri.scheme + "://" + parse_uri.host
       
       @origin_path = parse_uri.path || "/"
-      @origin_type = options[:type] || :html
+      @origin_type = options[:type] || 'html'
       @origin_headers = options[:headers] || {}
       @origin_query = options[:query] || {}
       @origin_data = options[:data]
@@ -47,7 +47,7 @@ module SpiderBot
     private
     
     def crawl_paginate(&block)
-      @page_headers.merge({"X-Requested-With" => "XMLHttpRequest"}) if @page_type == :json 
+      @page_headers.merge({"X-Requested-With" => "XMLHttpRequest"}) if @page_type.to_s == 'json'
       @connection.headers = @page_headers
       begin
         loop do
@@ -86,35 +86,32 @@ module SpiderBot
       body = response.parsed
       
       return if body.nil?
-
-      if type.to_sym == :json
-        body_data = eval("body#{data}")
-        @paginate_since = eval("body#{since}")
-      else
-        body_data = body.css(data)
-        return if body_data.blank?
-        if value = body_data.last.attributes[since]
-          @paginate_since = value.text 
-        end
-      end
+      
+      body_data = data.call(body) if data
+      @paginate_since = since.call(body_data, body) if since
 
       return body_data 
     end
 
     def get_page_url(path, query)
-      URI.join(@uri, path, query.map{|k,v| "#{k}=#{v}"}.join("&"))
+      if !query.blank?
+        @uri+path+"?" +query.map{|k,v| "#{k}=#{v}"}.join("&")
+      else
+        @uri+path
+      end
     end
 
     def set_paginate_headers(arg)
       @page_headers = arg || {}
     end
 
-    %i(path query since type data start add expire sleep).each do |name|
-      class_eval <<-RUBY
-        def set_paginate_#{name}(arg)
-          @page_#{name} = arg
-        end
-      RUBY
+    def paginate(&block)
+      block.call
+    end
+
+    def option(name, params)
+      raise "paginamte error" if %i(path query since type data start add expire sleep).include?(name.to_s)
+      eval("@page_#{name} = params")
     end
   end
 end

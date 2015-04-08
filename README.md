@@ -2,11 +2,11 @@
 
 一个简单的机器爬虫
 
-## 安装
+## SpiderBot 安装
 
 将下列文字添加到你程序中的Gemfile里
 
-```ruby
+```
 gem 'spider_bot'
 ```
 
@@ -18,82 +18,122 @@ gem 'spider_bot'
 
     $ gem install spider_bot
 
-## 使用
+## SpiderBot 文件
 
-### 文件调用
+#### 文件格式
 
-```ruby
-require 'spider_bot'
-
-SpiderBot.crawl("http:://example.com/funny")
+1.单站单页爬取， 返回html文本
 
 ```
+SpiderBot.crawl("http://example.com", #{origin_options})
+```
 
+2.单站多页爬取
 
+```
+SpiderBot.crawl("#{url}", data: Proce.new{ |data| data }, since: Proce.new{ |data| data }) do
 
-crawl_options 参数
+  paginate do
+    option :type, :json
+    option :path, '#{path}'
+    
+    # 翻页页码设置
+    option :start, 0
+    option :add, 10
+    option :expire, 100
+    option :sleep, 6
+     
+    # 翻页后获取信息设置
+    option :data, Proc.new{ |data| data }
+    option :since, Proc.new{ |since| since }
+    
+    option query, {page: "%{page}", since_id: %{since}}
+  end
+  
+  crawl_data do |data|
+    # 解析爬取的数据...
+  end
+end
+```
+
+3.多站，多页内容爬取， 可以配合Rails或者padrino进行任务爬去
+
+```
+class Mybot < SpiderBot::Base
+  origin "#{url}", data: Proc.new{ |data| data }, since: Proce.new{ |since| since }
+
+  paginate do
+    option :type, :json
+    option :path, '#{path}'
+    
+    # 翻页页码设置
+    option :start, 0
+    option :add, 10
+    option :expire, 100
+    option :sleep, 6
+     
+    # 翻页后获取信息设置
+    option :data, Proc.new{ |data| data }
+    option :since, Proc.new{ |since| since }
+    
+    option query, {page: "%{page}", since_id: %{since}}
+  end
+  
+  crawl_data do |data|
+    # 解析爬取的数据...
+  end
+end
+```
+
+####初始页面参数设置 origin_options
 
 * path
 * type
 * headers
 * query 
-* data 需要爬去的数据
-* since 需要获取的最后一条参数
+* data 获取初始页面数据
+* since 获取初始页码数据最后一条参数，用户翻页
+
+####翻页参数设置
+
+1.翻页后文本设置
+
+* paginate_type 翻页后类型[:html, :json, :xml]
+* paginate_path 翻页后的Path
+* paginate_query 翻页后的参数设置 {page: "%{page}", since: "%{since}"}
 
 
-### 执行独立文件
+2.翻页设置
 
-spider -bot name_bot.rb -out data.txt
+* paginate_start #翻页起始页， 默认为0
+* paginate_add #翻页增加数， 默认为 1
+* paginate_expire #翻页总结数， 默认为30
+* paginate_sleep #翻页休息数， 默认为 0
 
-###独立程序中使用
+3.翻页信息获取
 
-初始化爬虫程序
-	
-	$ spider new projectName
+* paginate_data 获取翻页后的数据, 不填写，默认为origin data
+* paginate_since 获取翻页后最后数据， 不填写， 默认为 origin_since
 
-然后自动生成
 
-```
-  projectNmae
-    |— app
-      |- models #数据库文件
-         |- model.rb
-      |- bots  #爬虫文件
-         |- site_bot.rb
-    |- config
-      |- database.yml #数据文件
-      |- splider.yml #爬虫程序的配置文件
-    |- log
-    |- db
-    
-```
+## SpiderBot 命令
 
-通过命令生成爬虫文件
+* spider url #直接通过命令爬取, 返回html文本
+  - -q query， 设置Query
+  - -d data， 爬取数据
+  - -o out，输出到文件
 
-splider bot #{bot_name} 
+* spider crawl #运行bot文件
+  - -b bot, 运行单一bot文件
+  - -d dir, 运行指定目录里的bot文件
 
-最后执行
+* spider start #运行爬取服务
+  - -d daemon, 后台运行
+  - -t time, #设置爬取时间间隔， 默认为10
+  - -r random #将爬取时间间隔， 设置为时间下一个随机数， 默认为10的随机数
+  - -e env #设置Sipder运行环境， 如果配合Rails或者Padrino， 获取指定运行环境
 
-	$ cd ProjectName
-	$ spider start
+* spider stop #停止爬取服务
 
-### 在Rails中使用
 
-添加爬虫文件
-
-	$ rails new bot #{bot_name}
-	
-当执行上述命令后， 会自动在rails程序中的app目录下生成bots目录。
-  
-```
-Rails Project
-  |- app
-    |- bots #爬虫程序
-  |- config
-    |- splider.yml #爬虫程序的配置
-```
-
-然后在rails应用中执行
-
-	$ bundle exec splider start
 
