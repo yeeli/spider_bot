@@ -26,3 +26,5 @@ module SpiderBot
   end
   autoload :Engine, 'spider_bot/engine'
 end
+
+require 'spider_bot/railte' if defined?(Rails) 

@@ -60,27 +60,40 @@ end
 
 ```
 class Mybot < SpiderBot::Base
-  origin "#{url}", data: Proc.new{ |data| data }, since: Proce.new{ |since| since }
-
-  paginate do
-    option :type, :json
-    option :path, '#{path}'
+  
+  #通过 "spider start” 或者 “spider crawl" 自动执行的方法
+  
+  auto do
+    origin "#{url}", data: Proc.new{ |data| data }, since: Proce.new{ |since| since }
+    exec do
     
-    # 翻页页码设置
-    option :start, 0
-    option :add, 10
-    option :expire, 100
-    option :sleep, 6
+      paginate do
+        option :type, :json
+        option :path, '#{path}'
+    
+        # 翻页页码设置
+        option :start, 0
+        option :add, 10
+        option :expire, 100
+        option :sleep, 6
      
-    # 翻页后获取信息设置
-    option :data, Proc.new{ |data| data }
-    option :since, Proc.new{ |since| since }
-    
-    option query, {page: "%{page}", since_id: %{since}}
+        # 翻页后获取信息设置
+        option :data, Proc.new{ |data| data }
+        option :since, Proc.new{ |since| since }
+       
+       option query, { page: "%{page}", since_id: "%{since}" }
+      end
+      
+      crawl_data do |data|
+        # 解析爬取的数据...
+      end
+    end
   end
   
-  crawl_data do |data|
-    # 解析爬取的数据...
+  #外部调用方法
+  method do
+    def fun
+    end
   end
 end
 ```
