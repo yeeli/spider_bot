@@ -5,6 +5,8 @@ require "thor"
 require 'spider_bot'
 require 'daemons'
 
+BOTCONSOLE = true
+
 module SpiderBot
   class CLI < Thor
     desc "url", "Crawl url"

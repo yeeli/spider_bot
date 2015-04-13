@@ -6,7 +6,7 @@ module SpiderBot
       #
       
       def auto &block
-        if defined?(BOTDIR)
+        if defined?(BOTCONSOLE)
           klass = Class.new do
             def origin url, options = {}
               @origin_url = url
