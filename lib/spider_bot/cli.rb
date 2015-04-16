@@ -41,6 +41,7 @@ module SpiderBot
       desc: "Read bot directory"
     
     def crawl
+      require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
       if options[:bot]
         bot_file = File.expand_path(options[:bot]) 
         

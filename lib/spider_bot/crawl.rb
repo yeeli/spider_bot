@@ -41,11 +41,13 @@ module SpiderBot
       @paginate_num = @page_start
       request_body = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_first, @origin_last, &block)
       return request_body  if !block_given?
-      yield request_body, @paginate_num, get_page_url(@origin_path, @origin_query)
-      @paginate_num += @page_add
-      raise "Net Error" if request_body.nil?
-      return if @page_query.blank? && @page_path == @origin_path
-      crawl_paginate(&block) 
+      catch :all do
+        yield request_body, @paginate_num, get_page_url(@origin_path, @origin_query)
+        @paginate_num += @page_add
+        raise "Net Error" if request_body.nil?
+        return if @page_query.blank? && @page_path == @origin_path
+        crawl_paginate(&block) 
+      end
     end
 
     private
@@ -118,6 +120,10 @@ module SpiderBot
     def option(name, params)
       raise "paginamte error" if %i(path query first last type data start add expire sleep).include?(name.to_s)
       eval("@page_#{name} = params")
+    end
+
+    def break_all
+      throw :all
     end
   end
 end

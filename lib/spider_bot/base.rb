@@ -22,14 +22,6 @@ module SpiderBot
         end
       end
 
-      # 
-      # Application require method scope
-      #
-
-      def method &block
-        extend Module.new &block
-      end
-
       def crawl url, options = {}
         crawl_instance = Crawl.new(url, options)
         crawl_instance.crawl_data

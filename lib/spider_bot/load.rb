@@ -1,7 +1,8 @@
 begin
   require File.expand_path("./config/environment")
 rescue LoadError => e
-  require File.expand_path("./config/boot")
+  bot_file = File.expand_path("./config/boot")
+  require bot_file if File.exists(bot_filea)
 end
 
 if defined?(Padrino)
