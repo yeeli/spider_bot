@@ -29,7 +29,6 @@ module SpiderBot
       return puts data 
     end
 
-
     desc "crawl", "Run spider bot file"
 
     method_option :bot, 
@@ -51,6 +50,7 @@ module SpiderBot
           raise "file not found"
         end
       end
+    
 
       if options[:dir]
         bot_dir = File.expand_path(options[:dir]) 
@@ -142,6 +142,7 @@ module SpiderBot
       
       loop do
         threads = []
+        
         BOTDIR.each do |file|
           threads << Thread.new do
             begin
@@ -152,6 +153,7 @@ module SpiderBot
             end
           end
         end
+
         threads.each { |t| t.join }
         
         if options[:random]
