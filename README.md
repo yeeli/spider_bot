@@ -65,7 +65,7 @@ class Mybot < SpiderBot::Base
   
   auto do
     origin "#{url}", data: Proc.new{ |data| data }, since: Proce.new{ |since| since }
-    exec do
+    execute do
     
       paginate do
         option :type, :json
