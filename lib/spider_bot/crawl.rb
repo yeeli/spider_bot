@@ -31,6 +31,7 @@ module SpiderBot
       
       @paginate_last = nil
       @paginate_error = 0
+      @paginate_type = :html
       @paginate_path = ""
       @paginate_query = {}
       
@@ -90,11 +91,12 @@ module SpiderBot
     def crawl_request(path, query, type, data, first, last, &block)
       response = @connection.get(path, query)
 
-      @paginate_path = path
-      @paginate_query = query
-
       return if !response
       return if response.status != 200
+
+      @paginate_path = path
+      @paginate_query = query
+      @paginate_type = response.parser
       
       body = response.parsed
       
@@ -146,7 +148,7 @@ module SpiderBot
     def process_response(response, &block)
       raise "crawl response body is blank..." if response.blank?
       SpiderBot.logger.info "crawling page for #{get_page_url}"
-      yield response, @paginate_num, get_page_url
+      yield response, @paginate_num, @paginate_type
       @paginate_num += @page_add
     end
   end
