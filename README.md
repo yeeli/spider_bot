@@ -89,12 +89,6 @@ class Mybot < SpiderBot::Base
       end
     end
   end
-  
-  #外部调用方法
-  method do
-    def fun
-    end
-  end
 end
 ```
 
