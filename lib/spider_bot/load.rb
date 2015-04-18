@@ -2,8 +2,8 @@
 begin
   require File.expand_path("./config/environment")
 rescue LoadError => e
-  bot_file = File.expand_path("./config/boot")
-  require bot_file if File.exists(bot_file)
+  bot_file = File.expand_path("./config/boot.rb")
+  require bot_file if File.exist?(bot_file)
 end
 
 if defined?(Padrino)

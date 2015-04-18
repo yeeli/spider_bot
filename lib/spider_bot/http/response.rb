@@ -56,13 +56,12 @@ module SpiderBot
 
       def parser
         type = CONTENT_TYPE[content_type]
-        type = :json if type == :html && !response.body.match(/\<html/) 
+        type = :json if type == :html && !response.body.match(/\<.*html|/) 
+        type = :html if type.nil?
         return type
       end
 
       def parsed
-        return nil unless CONTENT_TYPE.key?(content_type)
-        return nil unless PARSERS.key?(parser)
         @parsed ||= PARSERS[parser].call(body)
       end
     end

@@ -2,12 +2,14 @@ module SpiderBot
   class Crawl
     def initialize(url, options = {})
       parse_uri = URI.parse url
-      @uri = parse_uri.scheme + "://" + parse_uri.host
       
+      @uri = parse_uri.scheme + "://" + parse_uri.host
       @origin_path = parse_uri.path || "/"
+      
       @origin_type = options[:type] || 'html'
       @origin_headers = options[:headers] || {}
       @origin_query = options[:query] || {}
+      @origin_user_agent = options[:user_agent] || "Mac Safari"
 
       @origin_data = options[:data]
       @origin_first = options[:first]
@@ -29,22 +31,31 @@ module SpiderBot
       
       @paginate_last = nil
       @paginate_error = 0
-
+      @paginate_path = ""
+      @paginate_query = {}
+      
       @connection = Http::Client.new do |http| 
         http.url= @uri
-        http.user_agent= "Mac Safari"
+        http.user_agent= @origin_user_agent
         http.headers= @origin_headers
       end
     end
 
     def crawl_data(&block)
       @paginate_num = @page_start
-      request_body = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_first, @origin_last, &block)
-      return request_body  if !block_given?
       catch :all do
-        yield request_body, @paginate_num, get_page_url(@origin_path, @origin_query)
-        @paginate_num += @page_add
-        raise "Net Error" if request_body.nil?
+        begin
+          crawl_response = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_first, @origin_last, &block)
+          
+          return crawl_response if !block_given?
+          process_response(crawl_response, &block)
+        rescue Exception => e
+          handle_error(e)
+          crawl_data(&block)
+        end
+        
+        @paginate_error = 0
+        
         return if @page_query.blank? && @page_path == @origin_path
         crawl_paginate(&block) 
       end
@@ -58,37 +69,33 @@ module SpiderBot
       begin
         loop do
           break if @paginate_num > @page_expire 
+          
           sleep(@page_sleep) if @page_sleep > 0
-  
+          
           path = @page_path.to_s % {page: @paginate_num}
           query_str = @page_query.to_s % { page: @paginate_num, last: @paginate_last, first: @paginate_first }
           query = eval(query_str)
-  
-          request_body = crawl_request(path, query, @page_type, @page_data, @page_first, @page_last, &block)
-          break if request_body.nil?
-          yield request_body, @paginate_num, get_page_url(path, query) 
-          @paginate_num += @page_add
+          
+          crawl_response = crawl_request(path, query, @page_type, @page_data, @page_first, @page_last, &block)
+          process_response(crawl_response, &block)
         end
-
         @paginate_error = 0
-
       rescue Exception => e
-        puts "paginate error"
-        puts e
-        
         @paginate_num += @page_add if @paginate_error == 3
-        raise "request error" if @paginate_error == 6
-        @paginate_error += 1
-        
-        sleep(60)
+        handle_error(e)
         crawl_paginate(&block)
       end
     end
 
     def crawl_request(path, query, type, data, first, last, &block)
       response = @connection.get(path, query)
+
+      @paginate_path = path
+      @paginate_query = query
+
       return if !response
       return if response.status != 200
+      
       body = response.parsed
       
       return if body.nil?
@@ -101,11 +108,11 @@ module SpiderBot
       return body_data 
     end
 
-    def get_page_url(path, query)
-      if !query.blank?
-        @uri + path + "?" + query.map{ |k,v| "#{k}=#{v}" }.join("&")
+    def get_page_url
+      if !@paginate_query.blank?
+        @uri + @paginate_path + "?" + @paginate_query.map{ |k,v| "#{k}=#{v}" }.join("&")
       else
-        @uri + path
+        @uri + @paginate_path
       end
     end
 
@@ -118,12 +125,29 @@ module SpiderBot
     end
 
     def option(name, params)
-      raise "paginamte error" if %i(path query first last type data start add expire sleep).include?(name.to_s)
+      raise "set paginate options has error" if %i(path query first last type data start add expire sleep).include?(name.to_s)
       eval("@page_#{name} = params")
     end
 
     def break_all
       throw :all
+    end
+
+    def handle_error(error)
+      SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
+      SpiderBot.logger.error error.to_s
+      
+      raise "crawl exit..." if @paginate_error == 6
+      @paginate_error += 1
+      
+      sleep( 60 * @paginate_error )
+    end
+
+    def process_response(response, &block)
+      raise "crawl response body is blank..." if response.blank?
+      SpiderBot.logger.info "crawling page for #{get_page_url}"
+      yield response, @paginate_num, get_page_url
+      @paginate_num += @page_add
     end
   end
 end

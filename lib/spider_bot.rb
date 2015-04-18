@@ -7,6 +7,7 @@ require "multi_xml"
 require "yaml"
 require "active_support/time"
 require 'tzinfo'
+require 'spider_bot/logging'
 require "spider_bot/version"
 
 module SpiderBot
@@ -15,6 +16,10 @@ module SpiderBot
       crawl_instance = Crawl.new(url, options)
       return crawl_instance.crawl_data if !block_given?
       crawl_instance.instance_eval &block
+    end
+
+    def logger
+      SpiderBot::Logging.logger
     end
   end
 

@@ -61,10 +61,11 @@ module SpiderBot
           Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
             threads << Thread.new do
               begin
+                SpiderBot.logger.info "loading bot file with #{file}."
                 load file
               rescue Exception => e
-                puts " in #{ file }"
-                puts e
+                SpiderBot.logger.error "has errors with loading bot file #{ file }"
+                SpiderBot.logger.error e.to_s
               end
             end
           end
@@ -146,11 +147,13 @@ module SpiderBot
         BOTDIR.each do |file|
           threads << Thread.new do
             begin
+              SpiderBot.logger.info "loading bot file with #{file}."
               load file
             rescue Exception => e
-              puts " in #{ file }"
-              puts e
+              SpiderBot.logger.error "has errors with loading bot file #{ file }"
+              SpiderBot.logger.error e.to_s
             end
+            sleep(10)
           end
         end
 
