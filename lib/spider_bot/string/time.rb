@@ -1,4 +1,7 @@
 #coding: utf-8
+require "yaml"
+require "active_support/time"
+require 'tzinfo'
 
 DATE_CONFIG = YAML.load_file(File.expand_path("../date.yml", __FILE__))
 

@@ -4,9 +4,7 @@ require 'uri'
 require "nokogiri"
 require "multi_json"
 require "multi_xml"
-require "yaml"
-require "active_support/time"
-require 'tzinfo'
+require 'active_support/core_ext/string/conversions'
 require 'spider_bot/logging'
 require "spider_bot/version"
 
