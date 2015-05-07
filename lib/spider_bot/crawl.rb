@@ -10,6 +10,7 @@ module SpiderBot
       @origin_headers = options[:headers] || {}
       @origin_query = options[:query] || {}
       @origin_user_agent = options[:user_agent] || "Mac Safari"
+      @origin_source = options[:source] || false
 
       @origin_data = options[:data]
       @origin_first = options[:first]
@@ -89,16 +90,26 @@ module SpiderBot
     end
 
     def crawl_request(path, query, type, data, first, last, &block)
+      @paginate_path = path
+      @paginate_query = query
+      
       response = @connection.get(path, query)
 
       return if !response
       return if response.status != 200
 
-      @paginate_path = path
-      @paginate_query = query
-      @paginate_type = response.parser
-      
-      body = response.parsed
+      return response.body if @origin_source && !block_given?
+
+      if type.to_s == "html"
+        @paginate_type = :html
+        body = Nokogiri::HTML response.body
+      elsif type.to_s == "json"
+        @paginate_type = :json
+        body = MultiJson.load response.body
+      else
+        @paginate_type = response.parser
+        body = response.parsed
+      end
       
       return if body.nil?
       return body if data.nil?
