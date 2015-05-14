@@ -38,9 +38,16 @@ module SpiderBot
     method_option :dir, 
       aliases: ["-d"], 
       desc: "Read bot directory"
+
+    method_option :expire, 
+      aliases: ["-p"], 
+      desc: "Read data expired number"
     
     def crawl
+      $expire_num = options[:expire].to_i if options[:expire]
+
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
+
       if options[:bot]
         bot_file = File.expand_path(options[:bot]) 
         
@@ -96,8 +103,14 @@ module SpiderBot
      aliases: ["-e"],
      desc: "set spider service environment"
 
+    method_option :expire, 
+      aliases: ["-p"], 
+      desc: "Read data expired page_number"
+
     def start
       puts "start....."
+      
+      $expire_num = options[:expire].to_i if options[:expire]
       
       if options[:env]
         ENV['RACK_ENV'] = options[:env]

@@ -27,7 +27,7 @@ module SpiderBot
 
       @page_start = 1
       @page_add = 1
-      @page_expire = 30
+      @page_expire = 10
       @page_sleep = 0
       
       @paginate_last = nil
@@ -70,7 +70,15 @@ module SpiderBot
       @connection.headers = @page_headers
       begin
         loop do
-          break if @paginate_num > @page_expire 
+          real_page_num  = (@page_start == 0 && @page_add > 1) ? (@paginate_num / @page_add) + 1 : @paginate_num
+          if defined?($expire_num)
+            if $expire_num > 1
+              break if real_page_num > $expire_num.to_i
+            else
+              break if real_page_num > 1
+            end
+          end
+          break if real_page_num > @page_expire 
           
           sleep(@page_sleep) if @page_sleep > 0
           

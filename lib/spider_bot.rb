@@ -10,7 +10,7 @@ require "spider_bot/version"
 
 module SpiderBot
   class << self
-    def crawl(url, options, &block)
+    def crawl(url, options = {}, &block)
       crawl_instance = Crawl.new(url, options)
       return crawl_instance.crawl_data if !block_given?
       crawl_instance.instance_eval &block
