@@ -133,12 +133,14 @@ end
 * spider crawl #运行bot文件
   - -b bot, 运行单一bot文件
   - -d dir, 运行指定目录里的bot文件
+  - -p expire_page, 总翻页数（用以替代 option :export）
 
 * spider start #运行爬取服务
   - -d daemon, 后台运行
   - -t time, #设置爬取时间间隔， 默认为10
   - -r random #将爬取时间间隔， 设置为时间下一个随机数， 默认为10的随机数
   - -e env #设置Sipder运行环境， 如果配合Rails或者Padrino， 获取指定运行环境
+  - -p expire_page, 总翻页数（用以替代 option :export）
 
 * spider stop #停止爬取服务
 
