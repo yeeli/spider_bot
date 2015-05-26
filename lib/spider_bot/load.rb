@@ -1,9 +1,11 @@
-
 begin
-  require File.expand_path("./config/environment")
+  system_application = File.expand_path("./config/application.rb")
+  require system_application if File.exist?(system_application)
+  system_boot = File.expand_path("./config/boot.rb")
+  require system_boot if File.exist?(system_boot)
 rescue LoadError => e
-  bot_file = File.expand_path("./config/boot.rb")
-  require bot_file if File.exist?(bot_file)
+  system_boot = File.expand_path("./config/boot.rb")
+  require system_boot if File.exist?(system_boot)
 end
 
 if defined?(Padrino)
@@ -14,6 +16,5 @@ end
 if defined?(Rails)
   puts "read rails environment #{Rails.env}"
   BOTDIR = Dir.glob("#{Rails.root}/app/bots/*_bot.rb")
-  Rails.logger.level = Logger::WARN
 end
 
