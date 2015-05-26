@@ -20,8 +20,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "active_support"
 
+  spec.add_dependency "activesupport"
   spec.add_dependency "faraday"
   spec.add_dependency "nokogiri"
   spec.add_dependency "multi_json"

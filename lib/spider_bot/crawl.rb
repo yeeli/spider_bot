@@ -4,6 +4,7 @@ module SpiderBot
       parse_uri = URI.parse url
       
       @uri = parse_uri.scheme + "://" + parse_uri.host
+      @uri = @uri + ":" + parse_uri.port.to_s if parse_uri.port.to_s != "80"
       @origin_path = parse_uri.path || "/"
       
       @origin_type = options[:type] || 'html'
@@ -89,9 +90,8 @@ module SpiderBot
           crawl_response = crawl_request(path, query, @page_type, @page_data, @page_first, @page_last, &block)
           process_response(crawl_response, &block)
         end
-        @paginate_error = 0
       rescue Exception => e
-        @paginate_num += @page_add if @paginate_error == 3
+        @paginate_num += @page_add if @paginate_error == 2
         handle_error(e)
         crawl_paginate(&block)
       end
@@ -158,7 +158,7 @@ module SpiderBot
       SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
       SpiderBot.logger.error error.to_s
       
-      raise "crawl exit..." if @paginate_error == 6
+      break_all if @paginate_error == 3
       @paginate_error += 1
       
       sleep( 60 * @paginate_error )
@@ -169,6 +169,7 @@ module SpiderBot
       SpiderBot.logger.info "crawling page for #{get_page_url}"
       yield response, @paginate_num, @paginate_type
       @paginate_num += @page_add
+      @paginate_error = 0
     end
   end
 end
