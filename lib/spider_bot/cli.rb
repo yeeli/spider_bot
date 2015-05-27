@@ -141,7 +141,7 @@ module SpiderBot
         sleep_time = if parse_time
           case parse_time[0]
           when "d"
-            option_time.to_i * 60 * 60 * 60
+            option_time.to_i * 60 * 60 * 60 * 24
           when "h"
             option_time.to_i * 60 * 60
           when "m"
