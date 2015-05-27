@@ -11,6 +11,11 @@ if defined?(Padrino)
 end
 
 if defined?(Rails)
+  class Railtie < Rails::Railtie
+    initializer "disable eager load" do |app|
+      app.config.eager_load = false
+    end
+  end
   Rails.application.initialize!
   puts "read rails environment #{Rails.env}"
   BOTDIR = Dir.glob("#{Rails.root}/app/bots/**/*_bot.rb")
