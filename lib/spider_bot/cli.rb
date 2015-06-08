@@ -119,6 +119,10 @@ module SpiderBot
       end
       
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
+
+      if !File.exists?("tmp/pids")
+        FileUtils.mkdir_p("tmp/pids")
+      end
       
       daemon_options = {
         app_name: 'spider',
