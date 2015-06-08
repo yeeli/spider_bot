@@ -123,7 +123,7 @@ module SpiderBot
       daemon_options = {
         app_name: 'spider',
         ontop: true,
-        dir: 'tmp',
+        dir: 'tmp/pids',
       }
 
       sleep_time = 10
@@ -184,9 +184,9 @@ module SpiderBot
     desc 'stop', "Stop spider bot service"
 
     def stop
-      pid = File.read("tmp/spider.pid").to_i
+      pid = File.read("tmp/pids/spider.pid").to_i
       Process.kill(9, pid)
-      File.delete("tmp/spider.pid")
+      File.delete("tmp/pids/spider.pid")
     end
   end
 end
