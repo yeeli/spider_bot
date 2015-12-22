@@ -25,17 +25,22 @@ module SpiderBot
         response.headers
       end
 
-      def body
-        decode(response.body)
+      def body(options = {})
+        options = options || {}
+        decode(response.body, options)
       end
 
-      def decode(body)
+      def decode(body, options = {})
         return '' if !body 
         return body if json?
         charset = body.match(/charset\s*=[\s|\W]*([\w-]+)/)
         return body if charset[1].downcase == "utf-8"
+        charset_code = charset_covert(charset[1])
         begin
-          body.encode! "utf-8", charset[1], {:invalid => :replace} 
+          if options[:encode]
+            return body.encode! "utf-8", options[:encode], {:invalid => :replace} 
+          end
+          body.encode! "utf-8", charset_code, {:invalid => :replace} 
         rescue
           body
         end
@@ -63,6 +68,15 @@ module SpiderBot
 
       def parsed
         @parsed ||= PARSERS[parser].call(body)
+      end
+
+      def charset_covert(charset)
+        case charset
+        when "gb2312", "GB2312", "GBK"
+          "gbk"
+        else
+          charset
+        end
       end
     end
   end

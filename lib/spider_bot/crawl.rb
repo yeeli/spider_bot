@@ -16,6 +16,8 @@ module SpiderBot
       @origin_data = options[:data]
       @origin_first = options[:first]
       @origin_last = options[:last]
+
+      @origin_encode = options[:encode]
       
       @page_path = @origin_path
       @page_type = @origin_type
@@ -106,14 +108,18 @@ module SpiderBot
       return if !response
       return if response.status != 200
 
-      return response.body if @origin_source && !block_given?
+      options = { encode: @origin_encode } if @origin_encode
+
+      if @origin_source && !block_given?
+        return response.body(options) 
+      end
 
       if type.to_s == "html"
         @paginate_type = :html
-        body = Nokogiri::HTML response.body
+        body = Nokogiri::HTML response.body(options)
       elsif type.to_s == "json"
         @paginate_type = :json
-        body = MultiJson.load response.body
+        body = MultiJson.load response.body(options)
       else
         @paginate_type = response.parser
         body = response.parsed
