@@ -19,6 +19,10 @@ module SpiderBot
     def logger
       SpiderBot::Logging.logger
     end
+
+    def logger=(log)
+      SpiderBot::Logging.logger = log
+    end
   end
 
   autoload :Crawl, 'spider_bot/crawl'

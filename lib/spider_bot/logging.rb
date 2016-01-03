@@ -6,7 +6,7 @@ module SpiderBot
       oldlogger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = Logger::INFO
-      oldlogger.close if oldlogger && !$TESTING # don't want to close testing's STDOUT logging
+      oldlogger.close if oldlogger && !$TESTING 
       @logger
     end
 
