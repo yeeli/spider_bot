@@ -4,12 +4,15 @@ module SpiderBot
       parse_uri = URI.parse url
       
       @uri = parse_uri.scheme + "://" + parse_uri.host
-      @uri = @uri + ":" + parse_uri.port.to_s if parse_uri.port.to_s != "80"
+      if !["80", "443"].include?(parse_uri.port.to_s)
+        @uri = @uri + ":" + parse_uri.port.to_s 
+      end
       @origin_path = parse_uri.path || "/"
       
       @origin_type = options[:type] || 'html'
       @origin_headers = options[:headers] || {}
       @origin_query = options[:query] || {}
+
       @origin_user_agent = options[:user_agent] || "Mac Safari"
       @origin_source = options[:source] || false
 
