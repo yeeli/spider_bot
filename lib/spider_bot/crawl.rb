@@ -1,12 +1,29 @@
 module SpiderBot
   class Crawl
+    
+    # Initialize a new Spider Bot
+    # 
+    # @param url [String] the spider target website curl
+    # @param options [Hash] the spider crawl configurate options  
+    # @option options :type [Symbol] the request body format, `:html` or `:json`
+    # @option options :headers [Hash] the custom request headers
+    # @option options :query [Hash] the request query
+    # @option options :user_agent [String] the custom request user agent
+    # @option options :source [Boolean] 
+    # @option options :data [String] find crawl data list in body
+    # @option options :first [String]
+    # @option options :last [String]
+    # @option options :encode [String]
+    
     def initialize(url, options = {})
       parse_uri = URI.parse url
-      
       @uri = parse_uri.scheme + "://" + parse_uri.host
+      
+      # don't add 443 port append to url when access https website
       if !["80", "443"].include?(parse_uri.port.to_s)
         @uri = @uri + ":" + parse_uri.port.to_s 
       end
+      
       @origin_path = parse_uri.path || "/"
       
       @origin_type = options[:type] || 'html'
@@ -51,10 +68,10 @@ module SpiderBot
 
     def crawl_data(&block)
       @paginate_num = @page_start
+      
       catch :all do
         begin
           crawl_response = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_first, @origin_last, &block)
-          
           return crawl_response if !block_given?
           process_response(crawl_response, &block)
         rescue Exception => e
@@ -63,8 +80,8 @@ module SpiderBot
         end
         
         @paginate_error = 0
-        
         return if @page_query.blank? && @page_path == @origin_path
+        
         crawl_paginate(&block) 
       end
     end
@@ -173,8 +190,12 @@ module SpiderBot
       sleep( 60 * @paginate_error )
     end
 
+    # Print error infomation with http client response blank
+    #
+    # @param response [Object] The Faraday connection builder
+
     def process_response(response, &block)
-      raise "crawl response body is blank..." if response.blank?
+      raise "Crawl response body is blank..." if response.blank?
       SpiderBot.logger.info "crawling page for #{get_page_url}"
       yield response, @paginate_num, @paginate_type
       @paginate_num += @page_add

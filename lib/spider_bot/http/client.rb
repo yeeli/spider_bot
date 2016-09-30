@@ -59,21 +59,23 @@ module SpiderBot
       }
 
       # Initialize a new HttpClient
-      # 
-      # @param opts [String] the options to create a http with
-      # @option opts [String] :a the options
+      #
+      # @param uri [String] the uri with  
+      # @param options [Hash] the options to create a http with configure
+      # @option options [String] :header set the http request headers
+      # @yield [builder] 
       #
       # @example
-      #
-      # http = HttpClient.new
-      #
-      # http = HttpClient.new do |http|
-      #   http.user_agent= "Mac Safri"
-      #   http.url= "http://example.com"
-      # end
+      #   http = HttpClient.new
+      # 
+      #   http = HttpClient.new do |http|
+      #     http.user_agent= "Mac Safri"
+      #     http.url= "http://example.com"
+      #   end
      
       def initialize(uri = nil, options = nil, &block)
         @url = uri
+        @options = options
         @user_agent ||= USER_AGENT['bot']
         yield self if block_given?
       end
@@ -84,7 +86,7 @@ module SpiderBot
 
       # Set the url for HttpClient
       #
-      # @param [String] the HttpClient url
+      # @param uri [String] the HttpClient url
      
       def url=(uri)
         @conn = nil
@@ -93,7 +95,8 @@ module SpiderBot
 
       # Set the headers for HttpClient
       #
-      # @param [String] the HttpClient url
+      # @param headers [String] the HttpClient url
+      # @return [String]
       
       def headers=(headers)
         @headers = headers.merge({"User-Agent" => user_agent})
@@ -101,13 +104,14 @@ module SpiderBot
 
       # Set the user agent for HttpClient
       #
-      # @param [Symbol] the HttpClient user agent 
+      # @param name [Symbol] the HttpClient user agent 
       
       def user_agent=(name)
         @user_agent = USER_AGENT[name] || USER_AGENT['bot']
       end
 
       # The Faraday connection object
+      # @return [connection] The Faraday connection builder
       
       def connection
         @connection ||= begin
@@ -143,7 +147,7 @@ module SpiderBot
         end
       end
 
-      # Make get request with HttpClient 
+      # Handle get request with HttpClient 
       #
       # @param uri [String] URL path for request
       # @param query [Hash] additional query parameters for the URL of the request
@@ -152,6 +156,8 @@ module SpiderBot
         request(:get, uri, query, &block)
       end
 
+      # Handle post request with HttpClient
+      # @param (see #get)
       def post(uri, query = {}, &block)
         request(:post, uri, query, &block)
       end
