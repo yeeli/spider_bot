@@ -45,42 +45,31 @@ module SpiderBot
     
     def crawl
       $expire_num = options[:expire].to_i if options[:expire]
-
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
 
       if options[:bot]
         bot_file = File.expand_path(options[:bot]) 
-        
-        if File.exists?(bot_file)
-          load bot_file 
-        else
-          raise "file not found"
-        end
+        return raise "Bot file not found" if !File.exists?(bot_file)
+        load bot_file 
       end
     
-
       if options[:dir]
         bot_dir = File.expand_path(options[:dir]) 
-
-        if Dir.exists?(bot_dir)
-          threads = []
-
-          Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
-            threads << Thread.new do
-              begin
-                SpiderBot.logger.info "loading bot file with #{file}."
-                load file
-              rescue Exception => e
-                SpiderBot.logger.error "has errors with loading bot file #{ file }"
-                SpiderBot.logger.error e.to_s
-              end
+        return raise "Dir is not found" if !Dir.exists?(bot_dir)
+        
+        threads = []
+        Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
+          threads << Thread.new do
+            begin
+              SpiderBot.logger.info "loading bot file with #{file}."
+              load file
+            rescue Exception => e
+              SpiderBot.logger.error "has errors with loading bot file #{ file }"
+              SpiderBot.logger.error e.to_s
             end
           end
-
-          threads.each { |t| t.join }
-        else
-          raise "dir not found"
         end
+        threads.each { |t| t.join }
       end
     end
 
@@ -120,9 +109,7 @@ module SpiderBot
       
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
 
-      if !File.exists?("tmp/pids")
-        FileUtils.mkdir_p("tmp/pids")
-      end
+      FileUtils.mkdir_p("tmp/pids") if !File.exists?("tmp/pids")
       
       daemon_options = {
         app_name: 'spider',

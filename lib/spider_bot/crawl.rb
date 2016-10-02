@@ -10,10 +10,10 @@ module SpiderBot
     # @option options :query [Hash] the request query
     # @option options :user_agent [String] the custom request user agent
     # @option options :source [Boolean] 
-    # @option options :data [String] find crawl data list in body
-    # @option options :first [String]
-    # @option options :last [String]
-    # @option options :encode [String]
+    # @option options :data [Proc] get crawl data list in body
+    # @option options :first [Proc] get crawl data list first item 
+    # @option options :last [Porc] get crawl data list last item
+    # @option options :encode [String] custom request encode
     
     def initialize(url, options = {})
       parse_uri = URI.parse url
@@ -65,6 +65,10 @@ module SpiderBot
         http.headers= @origin_headers
       end
     end
+
+    # Process crawl data
+    #
+    # @param a [block]
 
     def crawl_data(&block)
       @paginate_num = @page_start
@@ -166,6 +170,22 @@ module SpiderBot
     def set_paginate_headers(arg)
       @page_headers = arg || {}
     end
+
+    # set crawl paginate settings
+    #
+    # @example
+    #   paginate do
+    #     option :path, '/path'
+    #     option :query, {page: "%{page}"}
+    #     option :first, Proc.new{|data| data.css("#item")}
+    #     option :last, Proc.new{|data| data.css("#item")}
+    #     option :type, :html
+    #     option :data, Proc.new{|body| body.css("#item")}
+    #     option :start, 1
+    #     option :add, 1
+    #     option :expire, 100
+    #     option :sleep, 100
+    #   end
 
     def paginate(&block)
       block.call
