@@ -40,7 +40,7 @@ SpiderBot.crawl("#{url}", data: Proce.new{ |data| data }, since: Proce.new{ |dat
     # 翻页页码设置
     option :start, 0
     option :add, 10
-    option :expire, 100
+    option :expire, 100 #如果设置为-1，将默认进行无限次爬取
     option :sleep, 6
      
     # 翻页后获取信息设置

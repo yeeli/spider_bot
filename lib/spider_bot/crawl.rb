@@ -26,7 +26,7 @@ module SpiderBot
       
       @origin_path = parse_uri.path || "/"
       
-      @origin_type = options[:type] || 'html'
+      @origin_type = options[:type] || :html
       @origin_headers = options[:headers] || {}
       @origin_query = options[:query] || {}
 
@@ -105,7 +105,7 @@ module SpiderBot
               break if real_page_num > 1
             end
           end
-          break if real_page_num > @page_expire 
+          break if real_page_num > @page_expire && @page_expire != -1
           
           sleep(@page_sleep) if @page_sleep > 0
           
@@ -215,7 +215,10 @@ module SpiderBot
     # @param response [Object] The Faraday connection builder
 
     def process_response(response, &block)
-      raise "Crawl response body is blank..." if response.blank?
+      if response.blank?
+        SpiderBot.logger.info "Crawl response body is blank..." 
+        break_all
+      end
       SpiderBot.logger.info "crawling page for #{get_page_url}"
       yield response, @paginate_num, @paginate_type
       @paginate_num += @page_add
