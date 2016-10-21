@@ -7,6 +7,7 @@ module SpiderBot
     # @param options [Hash] the spider crawl configurate options  
     # @option options :type [Symbol] the request body format, `:html` or `:json`
     # @option options :headers [Hash] the custom request headers
+    # @option options :path, [String] the custom request path
     # @option options :query [Hash] the request query
     # @option options :user_agent [String] the custom request user agent
     # @option options :source [Boolean] 
@@ -105,7 +106,12 @@ module SpiderBot
               break if real_page_num > 1
             end
           end
-          break if real_page_num > @page_expire && @page_expire != -1
+          #  break crawl_paginate current page number more than @page_expire and @page_expre
+          if real_page_num > @page_expire && @page_expire != -1
+            SpiderBot.logger.info "Crawl finished..."
+            SpiderBot.logger.info "Finish reson: The current page more than setting paginate expire"
+            break 
+          end
           
           sleep(@page_sleep) if @page_sleep > 0
           
@@ -216,7 +222,8 @@ module SpiderBot
 
     def process_response(response, &block)
       if response.blank?
-        SpiderBot.logger.info "Crawl response body is blank..." 
+        SpiderBot.logger.info "Crawl finished..."
+        SpiderBot.logger.info "Finish reson: Crawl response body is blank..." 
         break_all
       end
       SpiderBot.logger.info "crawling page for #{get_page_url}"
