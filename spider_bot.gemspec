@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = SpiderBot::VERSION
   spec.authors       = ["yee.li"]
   spec.email         = ["yeeli@outlook.com"]
-  spec.summary       = %q{splider bot}
-  spec.description   = %q{splider bot}
-  spec.homepage      = ""
+  spec.summary       = %q{Spider bot framework}
+  spec.description   = %q{Spider bot framework}
+  spec.homepage      = "https://github.com/yeeli/spider_bot"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
