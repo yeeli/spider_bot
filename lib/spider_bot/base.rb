@@ -14,7 +14,7 @@ module SpiderBot
             end
   
             def execute name = nil, &block
-              crawl_instance = Crawl.new(@origin_url, @origin_options)
+              crawl_instance = Crawling.new(@origin_url, @origin_options)
               crawl_instance.instance_eval &block
             end
           end

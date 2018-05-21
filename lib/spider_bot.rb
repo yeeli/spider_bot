@@ -11,7 +11,7 @@ require "spider_bot/version"
 module SpiderBot
   class << self
     def crawl(url, options = {}, &block)
-      crawl_instance = Crawl.new(url, options)
+      crawl_instance = Crawling.new(url, options)
       return crawl_instance.crawl_data if !block_given?
       crawl_instance.instance_eval &block
     end
@@ -25,7 +25,7 @@ module SpiderBot
     end
   end
 
-  autoload :Crawl, 'spider_bot/crawl'
+  autoload :Crawling, 'spider_bot/crawling'
   autoload :Base, 'spider_bot/base'
   module Http
     autoload :Client, 'spider_bot/http/client'

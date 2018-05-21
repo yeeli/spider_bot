@@ -1,5 +1,5 @@
 module SpiderBot
-  class Crawl
+  class Crawling
     
     # Initialize a new Spider Bot
     # 

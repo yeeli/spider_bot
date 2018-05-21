@@ -24,7 +24,7 @@ module SpiderBot
       desc: "Write to file"
 
     def url(arg)
-      data = Crawl.new(arg, options).crawl_data
+      data = Crawling.new(arg, options).crawl_data
       return File.open(options[:out], "w"){ file.puts data } if options[:out]
       return puts data 
     end
