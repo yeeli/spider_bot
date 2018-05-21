@@ -14,7 +14,7 @@ if defined?(Padrino)
 end
 
 if defined?(Rails)
-  class Railtie < Rails::Railtie
+  class Engine < Rails::Engine
     initializer "disable eager load" do |app|
       app.config.eager_load = false
     end

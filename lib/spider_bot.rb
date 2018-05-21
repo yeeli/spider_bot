@@ -31,7 +31,6 @@ module SpiderBot
     autoload :Client, 'spider_bot/http/client'
     autoload :Response, 'spider_bot/http/response'
   end
-  autoload :Engine, 'spider_bot/engine'
 end
 
-require 'spider_bot/railte' if defined?(Rails) 
+require 'spider_bot/rails' if defined?(::Rails::Engine) 
