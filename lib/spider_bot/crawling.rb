@@ -1,32 +1,32 @@
 module SpiderBot
   class Crawling
-    
+
     # Initialize a new Spider Bot
-    # 
+    #
     # @param url [String] the spider target website curl
-    # @param options [Hash] the spider crawl configurate options  
+    # @param options [Hash] the spider crawl configurate options
     # @option options :type [Symbol] the request body format, `:html` or `:json`
     # @option options :headers [Hash] the custom request headers
     # @option options :path, [String] the custom request path
     # @option options :query [Hash] the request query
     # @option options :user_agent [String] the custom request user agent
-    # @option options :source [Boolean] 
+    # @option options :source [Boolean]
     # @option options :data [Proc] get crawl data list in body
-    # @option options :first [Proc] get crawl data list first item 
+    # @option options :first [Proc] get crawl data list first item
     # @option options :last [Porc] get crawl data list last item
     # @option options :encode [String] custom request encode
-    
+
     def initialize(url, options = {})
       parse_uri = URI.parse url
       @uri = parse_uri.scheme + "://" + parse_uri.host
-      
+
       # don't add 443 port append to url when access https website
       if !["80", "443"].include?(parse_uri.port.to_s)
-        @uri = @uri + ":" + parse_uri.port.to_s 
+        @uri = @uri + ":" + parse_uri.port.to_s
       end
-      
+
       @origin_path = parse_uri.path || "/"
-      
+
       @origin_type = options[:type] || :html
       @origin_headers = options[:headers] || {}
       @origin_query = options[:query] || {}
@@ -39,7 +39,7 @@ module SpiderBot
       @origin_last = options[:last]
 
       @origin_encode = options[:encode]
-      
+
       @page_path = @origin_path
       @page_type = @origin_type
       @page_headers = @origin_headers || {}
@@ -53,14 +53,14 @@ module SpiderBot
       @page_add = 1
       @page_expire = 10
       @page_sleep = 0
-      
+
       @paginate_last = nil
       @paginate_error = 0
       @paginate_type = :html
       @paginate_path = ""
       @paginate_query = {}
-      
-      @connection = Http::Client.new do |http| 
+
+      @connection = Http::Client.new do |http|
         http.url= @uri
         http.user_agent= @origin_user_agent
         http.headers= @origin_headers
@@ -73,7 +73,7 @@ module SpiderBot
 
     def crawl_data(&block)
       @paginate_num = @page_start
-      
+
       catch :all do
         begin
           crawl_response = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_first, @origin_last, &block)
@@ -83,16 +83,16 @@ module SpiderBot
           handle_error(e)
           crawl_data(&block)
         end
-        
+
         @paginate_error = 0
         return if @page_query.blank? && @page_path == @origin_path
-        
-        crawl_paginate(&block) 
+
+        crawl_paginate(&block)
       end
     end
 
     private
-    
+
     def crawl_paginate(&block)
       @page_headers.merge({"X-Requested-With" => "XMLHttpRequest"}) if @page_type.to_s == 'json'
       @connection.headers = @page_headers
@@ -110,15 +110,15 @@ module SpiderBot
           if real_page_num > @page_expire && @page_expire != -1
             SpiderBot.logger.info "Crawl finished..."
             SpiderBot.logger.info "Finish reson: The current page more than setting paginate expire"
-            break 
+            break
           end
-          
+
           sleep(@page_sleep) if @page_sleep > 0
-          
+
           path = @page_path.to_s % {page: @paginate_num}
           query_str = @page_query.to_s % { page: @paginate_num, last: @paginate_last, first: @paginate_first }
           query = eval(query_str)
-          
+
           crawl_response = crawl_request(path, query, @page_type, @page_data, @page_first, @page_last, &block)
           process_response(crawl_response, &block)
         end
@@ -132,7 +132,7 @@ module SpiderBot
     def crawl_request(path, query, type, data, first, last, &block)
       @paginate_path = path
       @paginate_query = query
-      
+
       response = @connection.get(path, query)
 
       return if !response
@@ -141,7 +141,7 @@ module SpiderBot
       options = { encode: @origin_encode } if @origin_encode
 
       if @origin_source && !block_given?
-        return response.body(options) 
+        return response.body(options)
       end
 
       if type.to_s == "html"
@@ -150,11 +150,15 @@ module SpiderBot
       elsif type.to_s == "json"
         @paginate_type = :json
         body = MultiJson.load response.body(options)
+      elsif type.to_s == "rss"
+        @paginate_type = :rss
+        body = MultiXml.parse response.body(options)
+        p body
       else
         @paginate_type = response.parser
         body = response.parsed
       end
-      
+
       return if body.nil?
       return body if data.nil?
 
@@ -162,7 +166,7 @@ module SpiderBot
       @paginate_first = first.call(body_data, body) if first
       @paginate_last = last.call(body_data, body) if last
 
-      return body_data 
+      return body_data
     end
 
     def get_page_url
@@ -209,10 +213,10 @@ module SpiderBot
     def handle_error(error)
       SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
       SpiderBot.logger.error error.to_s
-      
+
       break_all if @paginate_error == 3
       @paginate_error += 1
-      
+
       sleep( 60 * @paginate_error )
     end
 
@@ -223,7 +227,7 @@ module SpiderBot
     def process_response(response, &block)
       if response.blank?
         SpiderBot.logger.info "Crawl finished..."
-        SpiderBot.logger.info "Finish reson: Crawl response body is blank..." 
+        SpiderBot.logger.info "Finish reson: Crawl response body is blank..."
         break_all
       end
       SpiderBot.logger.info "crawling page for #{get_page_url}"

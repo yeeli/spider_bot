@@ -6,7 +6,7 @@ rescue LoadError => e
 end
 
 if defined?(Padrino)
-  puts "read padrino environment #{Padrino.env}" 
+  puts "read padrino environment #{Padrino.env}"
   BOTDIR = Dir.glob("#{Padrino.root}/app/bots/**/*_bot.rb")
   if Padrino.env != :development
     SpiderBot::Logging.initialize_logger("#{Padrino.root}/log/spider.log")
@@ -14,10 +14,9 @@ if defined?(Padrino)
 end
 
 if defined?(Rails)
-  class Engine < Rails::Engine
-    initializer "disable eager load" do |app|
-      app.config.eager_load = false
-    end
+  class Railtie < Rails::Railtie
+    config.eager_load = false
+    config.included_models = ActiveRecord::Base.descendants.map!(&:name)
   end
   Rails.application.initialize!
   puts "read rails environment #{Rails.env}"

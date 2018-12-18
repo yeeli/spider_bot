@@ -26,37 +26,37 @@ module SpiderBot
     def url(arg)
       data = Crawling.new(arg, options).crawl_data
       return File.open(options[:out], "w"){ file.puts data } if options[:out]
-      return puts data 
+      return puts data
     end
 
     desc "crawl", "Run spider bot file"
 
-    method_option :bot, 
-      aliases: ["-b"], 
+    method_option :bot,
+      aliases: ["-b"],
       desc: "Read bot flle"
 
-    method_option :dir, 
-      aliases: ["-d"], 
+    method_option :dir,
+      aliases: ["-d"],
       desc: "Read bot directory"
 
-    method_option :expire, 
-      aliases: ["-p"], 
+    method_option :expire,
+      aliases: ["-p"],
       desc: "Read data expired number"
-    
+
     def crawl
       $expire_num = options[:expire].to_i if options[:expire]
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
 
       if options[:bot]
-        bot_file = File.expand_path(options[:bot]) 
+        bot_file = File.expand_path(options[:bot])
         return raise "Bot file not found" if !File.exists?(bot_file)
-        load bot_file 
+        load bot_file
       end
-    
+
       if options[:dir]
-        bot_dir = File.expand_path(options[:dir]) 
+        bot_dir = File.expand_path(options[:dir])
         return raise "Dir is not found" if !Dir.exists?(bot_dir)
-        
+
         threads = []
         Dir.glob("#{bot_dir}/*_bot.rb").each do |file|
           threads << Thread.new do
@@ -75,9 +75,9 @@ module SpiderBot
 
 
     desc "start", "Run spider bot service"
-   
-    method_option :daemon, 
-      aliases: ["-d"], 
+
+    method_option :daemon,
+      aliases: ["-d"],
       desc: "Run spider bot service in background"
 
     method_option :time,
@@ -92,25 +92,25 @@ module SpiderBot
      aliases: ["-e"],
      desc: "set spider service environment"
 
-    method_option :expire, 
-      aliases: ["-p"], 
+    method_option :expire,
+      aliases: ["-p"],
       desc: "Read data expired page_number"
 
     def start
       puts "start....."
-      
+
       $expire_num = options[:expire].to_i if options[:expire]
-      
+
       if options[:env]
         ENV['RACK_ENV'] = options[:env]
       else
         ENV['RACK_ENV']= 'development'
       end
-      
+
       require File.join(File.expand_path('../..',__FILE__), "spider_bot/load")
 
       FileUtils.mkdir_p("tmp/pids") if !File.exists?("tmp/pids")
-      
+
       daemon_options = {
         app_name: 'spider',
         ontop: true,
@@ -118,9 +118,9 @@ module SpiderBot
       }
 
       sleep_time = 10
-      
+
       if options[:daemon]
-        daemon_options[:ontop] = false 
+        daemon_options[:ontop] = false
       else
         puts "press ctrl-c exit"
       end
@@ -144,10 +144,10 @@ module SpiderBot
       end
 
       Daemons.daemonize(daemon_options)
-      
+
       loop do
         threads = []
-        
+
         BOTDIR.each do |file|
           threads << Thread.new do
             begin
@@ -162,7 +162,7 @@ module SpiderBot
         end
 
         threads.each { |t| t.join }
-        
+
         if options[:random]
           random_time = Random.new.rand(sleep_time)
           sleep(random_time.to_i)

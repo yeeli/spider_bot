@@ -1,10 +1,10 @@
 module SpiderBot
   class Base
     class << self
-      # 
-      # execute method with command "spider start" and "spider crawl" 
       #
-      
+      # execute method with command "spider start" and "spider crawl"
+      #
+
       def auto &block
         if defined?(BOTCONSOLE)
           klass = Class.new do
@@ -12,7 +12,7 @@ module SpiderBot
               @origin_url = url
               @origin_options = options
             end
-  
+
             def execute name = nil, &block
               crawl_instance = Crawling.new(@origin_url, @origin_options)
               crawl_instance.instance_eval &block

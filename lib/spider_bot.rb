@@ -33,4 +33,4 @@ module SpiderBot
   end
 end
 
-require 'spider_bot/rails' if defined?(::Rails::Engine) 
+require 'spider_bot/rails' if defined?(::Rails::Engine)
