@@ -152,21 +152,21 @@ module SpiderBot
         body = MultiJson.load response.body(options)
       elsif type.to_s == "rss"
         @paginate_type = :rss
-        body = MultiXml.parse response.body(options)
-        p body
+        rss = MultiXml.parse response.body(options)
+        body = rss["rss"]["channel"]
       else
         @paginate_type = response.parser
         body = response.parsed
       end
 
       return if body.nil?
-      return body if data.nil?
+      return [body] if data.nil?
 
       body_data = data.call(body) if data
       @paginate_first = first.call(body_data, body) if first
       @paginate_last = last.call(body_data, body) if last
 
-      return body_data
+      return [body_data, body]
     end
 
     def get_page_url
@@ -225,13 +225,13 @@ module SpiderBot
     # @param response [Object] The Faraday connection builder
 
     def process_response(response, &block)
-      if response.blank?
+      if response[0].blank?
         SpiderBot.logger.info "Crawl finished..."
         SpiderBot.logger.info "Finish reson: Crawl response body is blank..."
         break_all
       end
       SpiderBot.logger.info "crawling page for #{get_page_url}"
-      yield response, @paginate_num, @paginate_type
+      yield response[0], response[1], @paginate_num, @paginate_type
       @paginate_num += @page_add
       @paginate_error = 0
     end
