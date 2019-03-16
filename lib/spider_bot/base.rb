@@ -23,7 +23,7 @@ module SpiderBot
       end
 
       def crawl url, options = {}
-        crawl_instance = Crawl.new(url, options)
+        crawl_instance = Crawling.new(url, options)
         crawl_instance.crawl_data
       end
     end
