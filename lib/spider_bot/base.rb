@@ -13,7 +13,7 @@ module SpiderBot
               @origin_options = options
             end
 
-            def execute name = nil, &block
+            def execute options = {}, &block
               crawl_instance = Crawling.new(@origin_url, @origin_options)
               crawl_instance.instance_eval &block
             end
