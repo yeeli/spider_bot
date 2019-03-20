@@ -152,6 +152,8 @@ module SpiderBot
         body = MultiJson.load response.body(options)
       elsif type.to_s == "rss"
         @paginate_type = :rss
+        MultiXml.parser = :ox        
+        MultiXml.parser = MultiXml::Parsers::Ox
         rss = MultiXml.parse response.body(options)
         body = rss["rss"]["channel"]
       else

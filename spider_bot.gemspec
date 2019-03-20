@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "tzinfo"
   spec.add_dependency "thor"
   spec.add_dependency 'daemons'
+  spec.add_dependency 'ox'
 end

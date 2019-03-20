@@ -1,9 +1,37 @@
 module SpiderBot
   class Base
+    attr_accessor :bot_options
+
+    def initialize(url, _options = {})
+      origin_url = url
+      @bot_options = _options
+      origin_options = set_origin_options
+      @crawl_instance = Crawling.new(origin_url, origin_options)
+    end
+
+    def crawl
+      response_data.call(@crawl_instance.crawl_data)
+    end
+
+    def execute
+      @crawl_instance.crawl_data &response_data
+    end
+
+    def result
+      data = @crawl_instance.crawl_data[0]
+    end
+
     class << self
       #
       # execute method with command "spider start" and "spider crawl"
       #
+      def origin(options)
+        define_method(:set_origin_options){return options}
+      end
+
+      def crawl_data &block
+        define_method(:response_data){return block}
+      end
 
       def auto &block
         if defined?(BOTCONSOLE)

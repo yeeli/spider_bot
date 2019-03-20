@@ -3,6 +3,7 @@ require "faraday"
 require 'uri'
 require "nokogiri"
 require "multi_json"
+require "ox"
 require "multi_xml"
 require 'active_support/core_ext/string/conversions'
 require 'spider_bot/logging'
