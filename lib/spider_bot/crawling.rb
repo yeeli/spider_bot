@@ -146,15 +146,18 @@ module SpiderBot
 
       if type.to_s == "html"
         @paginate_type = :html
-        body = Nokogiri::HTML response.body(options)
+        origin_body = response.body(options)
+        body = Nokogiri::HTML origin_body
       elsif type.to_s == "json"
         @paginate_type = :json
-        body = MultiJson.load response.body(options)
+        origin_body = response.body(options)
+        body = MultiJson.load origin_body
       elsif type.to_s == "rss"
         @paginate_type = :rss
         MultiXml.parser = :ox        
         MultiXml.parser = MultiXml::Parsers::Ox
-        rss = MultiXml.parse response.body(options)
+        origin_body = response.body(options)
+        rss = MultiXml.parse origin_body
         body = rss["rss"]["channel"]
       else
         @paginate_type = response.parser
@@ -168,7 +171,7 @@ module SpiderBot
       @paginate_first = first.call(body_data, body) if first
       @paginate_last = last.call(body_data, body) if last
 
-      return [body_data, body]
+      return [body_data, body, origin_body]
     end
 
     def get_page_url
