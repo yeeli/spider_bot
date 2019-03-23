@@ -16,7 +16,7 @@ module SpiderBot
     # @option options :last [Porc] get crawl data list last item
     # @option options :encode [String] custom request encode
 
-    def initialize(url, options = {})
+    def initialize(url, options = {}, class_options = {})
       parse_uri = URI.parse url
       @uri = parse_uri.scheme + "://" + parse_uri.host
 
@@ -65,6 +65,7 @@ module SpiderBot
         http.user_agent= @origin_user_agent
         http.headers= @origin_headers
       end
+      @class_options = class_options
     end
 
     # Process crawl data
@@ -236,7 +237,7 @@ module SpiderBot
         break_all
       end
       SpiderBot.logger.info "crawling page for #{get_page_url}"
-      yield response[0], response[1], response[2], @paginate_num, @paginate_type
+      yield response[0], { body: response[1], origin_body: response[2], page: @paginate_num, type: @paginate_type }, @class_options
       @paginate_num += @page_add
       @paginate_error = 0
     end

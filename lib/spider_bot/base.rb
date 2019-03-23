@@ -4,9 +4,8 @@ module SpiderBot
 
     def initialize(url, _options = {})
       origin_url = url
-      @bot_options = _options
       origin_options = set_origin_options
-      @crawl_instance = Crawling.new(origin_url, origin_options)
+      @crawl_instance = Crawling.new(origin_url, origin_options, _options)
     end
 
     def crawl
