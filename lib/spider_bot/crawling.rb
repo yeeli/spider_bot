@@ -33,6 +33,7 @@ module SpiderBot
 
       @origin_user_agent = options[:user_agent] || "Mac Safari"
       @origin_source = options[:source] || false
+      @origin_retry = options[:retry] || false
 
       @origin_data = options[:data]
       @origin_first = options[:first]
@@ -81,8 +82,13 @@ module SpiderBot
           return crawl_response if !block_given?
           process_response(crawl_response, &block)
         rescue Exception => e
-          handle_error(e)
-          crawl_data(&block)
+          if @origin_retry
+            handle_error(e)
+            crawl_data(&block)
+          else
+            SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
+            SpiderBot.logger.error e.to_s
+          end
         end
 
         @paginate_error = 0
@@ -125,8 +131,13 @@ module SpiderBot
         end
       rescue Exception => e
         @paginate_num += @page_add if @paginate_error == 2
-        handle_error(e)
-        crawl_paginate(&block)
+        if @origin_retry
+          handle_error(e)
+          crawl_paginate(&block)
+        else
+          SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
+          SpiderBot.logger.error e.to_s
+        end
       end
     end
 
