@@ -33,8 +33,10 @@ module SpiderBot
       def decode(body, options = {})
         return '' if !body 
         return body if json?
-        charset = body.match(/charset\s*=[\s|\W]*([\w-]+)/)
-        return body if charset[1].downcase == "utf-8"
+        charset = body.match(/(charset|encoding)\s*=[\s|\W]*([\w-]+)/)
+        if charset.blank? || charset[2].downcase == "utf-8"
+          return body.force_encoding('UTF-8') 
+        end
         charset_code = charset_covert(charset[1])
         begin
           if options[:encode]
@@ -56,7 +58,7 @@ module SpiderBot
       end
 
       def json?
-        CONTENT_TYPE[content_type] == :json || !response.body.match(/\<html/)
+        CONTENT_TYPE[content_type] == :json || !response.body.match(/\<(html|xml|rss)/)
       end
 
       def parser
