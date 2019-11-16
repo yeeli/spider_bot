@@ -29,7 +29,7 @@ module SpiderBot
 
       @origin_type = options[:type] || :html
       @origin_headers = options[:headers] || {}
-      @origin_query = options[:query] || {}
+      @origin_query = options[:query] || URI.decode_www_form(parse_uri.query || "").to_h
 
       @origin_user_agent = options[:user_agent] || "Mac Safari"
       @origin_source = options[:source] || false
