@@ -33,7 +33,7 @@ module SpiderBot
 
       @origin_user_agent = options[:user_agent] || "Mac Safari"
       @origin_source = options[:source] || false
-      @origin_retry = options[:retry] || false
+      @origin_retry = options[:retry] || 0
 
       @origin_data = options[:data]
       @origin_first = options[:first]
@@ -56,10 +56,12 @@ module SpiderBot
       @page_sleep = 0
 
       @paginate_last = nil
-      @paginate_error = 0
       @paginate_type = :html
       @paginate_path = ""
       @paginate_query = {}
+
+      @crawling_errors = []
+      @crawling_retry = 0
 
       @connection = Http::Client.new do |http|
         http.url= @uri
@@ -82,23 +84,26 @@ module SpiderBot
           return crawl_response if !block_given?
           process_response(crawl_response, &block)
         rescue Exception => e
-          if @origin_retry
+          if @origin_retry > 0
             handle_error(e)
             crawl_data(&block)
           else
-            SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
-            SpiderBot.logger.error e.to_s
+            @crawling_errors << e.to_s
+            SpiderBot.logger.error "#{ get_page_url } crawling failed."
+            SpiderBot.logger.warn e.to_s
+            SpiderBot.logger.warn e.backtrace.join("\n")
           end
         end
 
-        @paginate_error = 0
+        @crawling_retry = 0
         return if @page_query.blank? && @page_path == @origin_path
 
         crawl_paginate(&block)
       end
-      catch :crawling_break_all do
-        raise SpiderBot::Error, "crawling error"
-      end
+    end
+
+    def errors
+      @crawling_errors.uniq
     end
 
     private
@@ -133,13 +138,15 @@ module SpiderBot
           process_response(crawl_response, &block)
         end
       rescue Exception => e
-        @paginate_num += @page_add if @paginate_error == 2
-        if @origin_retry
+        @paginate_num += @page_add if @crawling_retry == 2
+        if @origin_retry > 0
           handle_error(e)
           crawl_paginate(&block)
         else
-          SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
+          SpiderBot.logger.error "#{ get_page_url } crawling pagination failed."
           SpiderBot.logger.error e.to_s
+
+            SpiderBot.logger.warn e.to_s
         end
       end
     end
@@ -189,6 +196,8 @@ module SpiderBot
       return [body_data, body, res_body]
     end
 
+
+
     def get_page_url
       if !@paginate_query.blank?
         @uri + @paginate_path + "?" + @paginate_query.map{ |k,v| "#{k}=#{v}" }.join("&")
@@ -231,13 +240,20 @@ module SpiderBot
     end
 
     def handle_error(error)
-      SpiderBot.logger.error "crawling url #{ get_page_url } has error..."
-      SpiderBot.logger.error error.to_s
+      @crawling_errors << error.to_s
+      if @crawling_retry >= @origin_retry
+        SpiderBot.logger.error "#{ get_page_url } crawling retry failed."
+        SpiderBot.logger.warn error.to_s
+        SpiderBot.logger.warn error.backtrace.join("\n")
+        break_all 
+      else
+        SpiderBot.logger.error "#{ get_page_url } crawling failed."
+        SpiderBot.logger.warn error.to_s
+        SpiderBot.logger.warn error.backtrace.join("\n")
+      end
+      @crawling_retry += 1
 
-      break_all if @paginate_error == 3
-      @paginate_error += 1
-
-      sleep( 60 * @paginate_error )
+      sleep( 10 * @crawling_retry)
     end
 
     # Print error infomation with http client response blank
@@ -250,7 +266,7 @@ module SpiderBot
         SpiderBot.logger.info "Finish reson: Crawl response body is blank..."
         break_all
       end
-      SpiderBot.logger.info "crawling page for #{get_page_url}"
+      SpiderBot.logger.info "crawling #{get_page_url}"
       yield response[0], { body: response[1], origin_body: response[2], page: @paginate_num, type: @paginate_type }, @class_options
       @paginate_num += @page_add
       @paginate_error = 0

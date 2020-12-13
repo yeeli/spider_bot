@@ -20,6 +20,10 @@ module SpiderBot
       data = @crawl_instance.crawl_data[0]
     end
 
+    def errors
+      @crawl_instance.errors
+    end
+
     class << self
       #
       # execute method with command "spider start" and "spider crawl"
