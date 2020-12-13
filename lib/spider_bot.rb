@@ -8,6 +8,7 @@ require "multi_xml"
 require 'active_support/core_ext/string/conversions'
 require 'spider_bot/logging'
 require "spider_bot/version"
+require 'spider_bot/error'
 
 module SpiderBot
   class << self
