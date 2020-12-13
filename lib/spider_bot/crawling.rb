@@ -76,7 +76,7 @@ module SpiderBot
     def crawl_data(&block)
       @paginate_num = @page_start
 
-      catch :all do
+      catch :crawling_break_all do
         begin
           crawl_response = crawl_request(@origin_path, @origin_query, @origin_type, @origin_data, @origin_first, @origin_last, &block)
           return crawl_response if !block_given?
@@ -95,6 +95,9 @@ module SpiderBot
         return if @page_query.blank? && @page_path == @origin_path
 
         crawl_paginate(&block)
+      end
+      catch :crawling_break_all do
+        raise SpiderBot::Error, "crawling error"
       end
     end
 
@@ -224,7 +227,7 @@ module SpiderBot
     end
 
     def break_all
-      throw :all
+      throw :crawling_break_all
     end
 
     def handle_error(error)
